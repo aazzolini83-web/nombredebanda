@@ -17,6 +17,13 @@ export default async (req) => {
   if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
   try {
     const body = await req.json();
+    if (body.action === "reset") {
+      for (const person of PEOPLE) {
+        await store.setJSON(`names-${person}`, []);
+        await store.setJSON(`vote-${person}`, null);
+      }
+      return json(await fullState(store));
+    }
     if (!validPerson(body.person)) return json({ error: "Participante no válido" }, 400);
     if (body.action === "addName") {
       const name = String(body.name || "").trim().slice(0, 45); if (!name) return json({ error: "Nombre vacío" }, 400);
